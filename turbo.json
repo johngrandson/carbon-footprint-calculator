@@ -16,6 +16,11 @@
     "dev": {
       "cache": false,
       "persistent": true
+    },
+    "test": {
+      "inputs": ["$TURBO_DEFAULT$", "$TURBO_ROOT$/vitest.config.ts"],
+      "dependsOn": ["@repo/vitest-config#build"],
+      "outputs": ["coverage.json"]
     }
   }
 }
