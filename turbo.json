@@ -1,6 +1,7 @@
 {
   "$schema": "https://turborepo.com/schema.json",
   "ui": "tui",
+  "globalEnv": ["NEXT_PUBLIC_PUBLIC_API_URL"],
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
@@ -19,7 +20,7 @@
     },
     "test": {
       "inputs": ["$TURBO_DEFAULT$", "$TURBO_ROOT$/vitest.config.ts"],
-      "dependsOn": ["@repo/vitest-config#build"],
+      "dependsOn": ["@workspace/vitest-config#build"],
       "outputs": ["coverage.json"]
     }
   }

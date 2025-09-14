@@ -10,10 +10,12 @@
     "test": "turbo run test",
     "test:projects": "vitest run",
     "test:projects:watch": "vitest --watch",
-    "view-report": "turbo run view-report"
+    "view-report": "turbo run view-report",
+    "preinstall": "pnpm run --filter @tooling/requirements-check requirements"
   },
   "devDependencies": {
-    "@repo/vitest-config": "workspace:*",
+    "@workspace/vitest-config": "workspace:*",
+    "@turbo/gen": "2.5.4",
     "prettier": "^3.6.2",
     "turbo": "^2.5.6",
     "typescript": "5.9.2",
