@@ -13,16 +13,19 @@
   "dependencies": {
     "@workspace/ui": "workspace:*",
     "next": "^15.5.0",
+    "next-secure-headers": "^2.2.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0"
   },
   "devDependencies": {
-    "@workspace/eslint-config": "workspace:*",
-    "@workspace/typescript-config": "workspace:*",
+    "@next/bundle-analyzer": "15.3.3",
     "@types/node": "^22.15.3",
     "@types/react": "19.1.0",
     "@types/react-dom": "19.1.1",
+    "@workspace/eslint-config": "workspace:*",
+    "@workspace/typescript-config": "workspace:*",
     "eslint": "^9.34.0",
     "typescript": "5.9.2"
-  }
+  },
+  "prettier": "@workspace/prettier-config"
 }
