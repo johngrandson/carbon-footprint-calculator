@@ -3,6 +3,7 @@ import { type Metadata } from 'next';
 import Image, { type ImageProps } from 'next/image';
 
 import { Button } from '@workspace/ui/components/button';
+import { Homepage } from '@workspace/ui/components/three/pages/homepage';
 
 export const metadata: Metadata = {
   title: 'Sinai Carbon Footprint Calculator',
@@ -37,20 +38,30 @@ const ThemeImage = (props: Props) => {
 
 export default function HomePage(): React.JSX.Element {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 dark:from-green-950/20 dark:to-blue-950/20">
+    <div className="relative h-screen overflow-hidden flex flex-col">
+      {/* 3D Earth Background */}
+      <Homepage className="absolute inset-0 z-0" />
+
+      {/* Simple overlay for text readability */}
+      <div className="absolute inset-0 z-10 bg-white/10 dark:bg-gray-100/10" />
+
+      {/* Header with Logo */}
+      <header className="relative z-20 mt-10 flex-shrink-0">
+        <div className="flex justify-center">
+          <ThemeImage
+            src="/sinai-logo.png"
+            alt="Sinai logo"
+            width={120}
+            height={25}
+            priority
+          />
+        </div>
+      </header>
+
       {/* Hero Section */}
-      <section className="relative py-20 px-4">
-        <div className="container mx-auto text-center">
-          <div className="flex justify-center mb-4">
-            <ThemeImage
-              src="/sinai-logo.png"
-              alt="Sinai logo"
-              width={180}
-              height={38}
-              priority
-            />
-          </div>
-          <h1 className="text-4xl md:text-5xl font-bold text-foreground">
+      <section className="relative z-20 flex-1 flex items-center justify-center px-4">
+        <div className="container mx-auto max-w-4xl text-center">
+          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-6">
             How big is your environmental footprint?
           </h1>
 
@@ -62,22 +73,19 @@ export default function HomePage(): React.JSX.Element {
           </p>
 
           <div className="flex flex-col gap-4 sm:flex-row sm:justify-center">
-            <div className="flex flex-col gap-4 sm:flex-row sm:justify-center">
-              <Button
-                size="lg"
-                className="w-full sm:w-auto uppercase"
-              >
-                Start Assessment
-              </Button>
-            </div>
-            <div className="flex flex-col gap-4 sm:flex-row sm:justify-center">
-              <Button
-                size="lg"
-                className="w-full sm:w-auto uppercase"
-              >
-                Learn More
-              </Button>
-            </div>
+            <Button
+              size="lg"
+              className="w-full sm:w-auto"
+            >
+              Start Assessment
+            </Button>
+            <Button
+              variant="outline"
+              size="lg"
+              className="w-full sm:w-auto"
+            >
+              Learn More
+            </Button>
           </div>
         </div>
       </section>
