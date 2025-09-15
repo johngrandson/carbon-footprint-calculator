@@ -1,9 +1,10 @@
 import * as React from 'react';
 import { type Metadata } from 'next';
 import Image, { type ImageProps } from 'next/image';
+import Link from 'next/link';
 
 import { Button } from '@workspace/ui/components/button';
-import { Homepage } from '@workspace/ui/components/three/pages/homepage';
+import { Homepage } from '@workspace/ui/components/homepage';
 
 export const metadata: Metadata = {
   title: 'Sinai Carbon Footprint Calculator',
@@ -73,12 +74,14 @@ export default function HomePage(): React.JSX.Element {
           </p>
 
           <div className="flex flex-col gap-4 sm:flex-row sm:justify-center">
-            <Button
-              size="lg"
-              className="w-full sm:w-auto"
-            >
-              Start Assessment
-            </Button>
+            <Link href="/quiz">
+              <Button
+                size="lg"
+                className="w-full sm:w-auto"
+              >
+                Start Assessment
+              </Button>
+            </Link>
             <Button
               variant="outline"
               size="lg"

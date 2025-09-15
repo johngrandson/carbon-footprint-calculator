@@ -1,8 +1,8 @@
 'use client';
 
-import { Lighting, LIGHTING_PRESETS } from '../lighting';
-import { Model } from '../model';
-import { Scene } from '../scene';
+import { Lighting, LIGHTING_PRESETS } from './lighting';
+import { Model } from './model';
+import { Scene } from './scene';
 
 export function Homepage({ className }: { className?: string }) {
   return (
@@ -16,10 +16,7 @@ export function Homepage({ className }: { className?: string }) {
         src="/earth.glb"
         scale={1}
         position={[0, 0, 0]}
-        rotation={{
-          speed: 15,
-          axis: [-14, 0, 1]
-        }}
+        rotationSpeed={0.5}
         geometryPath="Sphere_Material002_0.geometry"
         materialPath="Material.003"
       />
