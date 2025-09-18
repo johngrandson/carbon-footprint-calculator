@@ -2,6 +2,9 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import {
   FormProvider,
   useForm,
+  useFormContext,
+  type FieldPath,
+  type FieldValues,
   type UseFormProps,
   type UseFormReturn
 } from 'react-hook-form';
@@ -21,4 +24,13 @@ export function useZodForm<TSchema extends z.ZodTypeAny>(
   });
 }
 
-export { FormProvider, UseFormReturn };
+export {
+  FormProvider,
+  UseFormReturn,
+  useFormContext,
+  type FieldPath,
+  type FieldValues
+};
+
+// Re-export zod for web app to use
+export { z } from 'zod';
