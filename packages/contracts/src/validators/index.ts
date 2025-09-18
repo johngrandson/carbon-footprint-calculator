@@ -15,11 +15,24 @@ export function safeValidate<T>(
     return { success: true, data: result.data };
   }
 
-  const errors: ValidationError[] = result.error.errors.map((error) => ({
-    field: error.path.join('.'),
-    message: error.message,
-    value: error.path.reduce((obj, key) => obj?.[key], data as any)
-  }));
+  const errors: ValidationError[] = result.error.errors.map((error) => {
+    // Navigate through the path to get the value that caused the error
+    let currentValue: unknown = data;
+    for (const key of error.path) {
+      if (currentValue && typeof currentValue === 'object' && key in currentValue) {
+        currentValue = (currentValue as Record<string | number, unknown>)[key];
+      } else {
+        currentValue = undefined;
+        break;
+      }
+    }
+
+    return {
+      field: error.path.join('.'),
+      message: error.message,
+      value: currentValue
+    };
+  });
 
   return { success: false, errors };
 }
