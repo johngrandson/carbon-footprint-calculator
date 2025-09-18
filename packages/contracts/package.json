@@ -23,6 +23,7 @@
   },
   "prettier": "@workspace/prettier-config",
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./src/schemas/openapi": "./src/schemas/openapi/index.ts"
   }
 }
