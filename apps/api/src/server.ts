@@ -1,10 +1,11 @@
 import 'dotenv/config';
 
-import Fastify from 'fastify';
 import swagger from '@fastify/swagger';
 import swaggerUi from '@fastify/swagger-ui';
+import Fastify from 'fastify';
 
-import { swaggerConfig } from './config/swagger';
+import { swaggerConfig } from '@workspace/contracts';
+
 import { registerRoutes } from './routes';
 
 const fastify = Fastify({
@@ -13,7 +14,7 @@ const fastify = Fastify({
   }
 });
 
-// Register Swagger plugins
+// Register Swagger plugins using contracts-generated config
 await fastify.register(swagger, swaggerConfig.spec);
 await fastify.register(swaggerUi, swaggerConfig.ui);
 
@@ -28,7 +29,6 @@ const start = async () => {
 
     await fastify.listen({ port, host });
     console.log(`🚀 API running at http://${host}:${port}`);
-    console.log(`📊 Calculate at http://${host}:${port}/api/calculate`);
     console.log(`📚 Documentation at http://${host}:${port}/documentation`);
   } catch (err) {
     fastify.log.error(err);

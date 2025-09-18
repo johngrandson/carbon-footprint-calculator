@@ -78,7 +78,7 @@ describe('QuizService - Error Handling', () => {
       quizService.submitAnswer(sessionId, '500');
 
       const currentQuestion = quizService.getCurrentQuestion(sessionId);
-      expect(currentQuestion).toBeNull();
+      expect(currentQuestion).toBeUndefined();
     });
 
     it('should still return answers after completion', () => {

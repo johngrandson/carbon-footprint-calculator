@@ -63,7 +63,7 @@ describe('QuizService - Question Navigation', () => {
     quizService.submitAnswer(sessionId, '500');
 
     const currentQuestion = quizService.getCurrentQuestion(sessionId);
-    expect(currentQuestion).toBeNull();
+    expect(currentQuestion).toBeUndefined();
     expect(quizService.isSessionCompleted(sessionId)).toBe(true);
   });
 
@@ -110,6 +110,6 @@ describe('QuizService - Question Navigation', () => {
 
     // After final answer, should return null (completed)
     quizService.submitAnswer(sessionId, '300');
-    expect(quizService.getCurrentQuestion(sessionId)).toBeNull();
+    expect(quizService.getCurrentQuestion(sessionId)).toBeUndefined();
   });
 });

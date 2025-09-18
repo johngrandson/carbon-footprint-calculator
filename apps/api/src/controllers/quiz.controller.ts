@@ -2,12 +2,18 @@ import { FastifyPluginAsync, FastifyReply, FastifyRequest } from 'fastify';
 
 import type {
   ApiError,
-  QuizAnswer,
-  QuizCalculationRequest
+  QuizAnswerRequest,
+  QuizAnswerResponse,
+  QuizCalculationRequest,
+  QuizCalculationResponse,
+  QuizStartResponse,
+  QuizStatusResponse
 } from '@workspace/contracts';
 
 import { AIService } from '../services/ai.service';
 import { CalculationService } from '../services/calculation.service';
+import { ErrorHandlerService } from '../services/error-handler.service';
+import { QuizAnswerConverterService } from '../services/quiz-answer-converter.service';
 import { QuizService } from '../services/quiz.service';
 
 const quizController: FastifyPluginAsync = async (fastify) => {
@@ -15,117 +21,127 @@ const quizController: FastifyPluginAsync = async (fastify) => {
   const calculationService = new CalculationService();
   const aiService = new AIService();
 
+  // Add a custom content parser for the start route to handle empty JSON
+  fastify.addContentTypeParser(
+    'application/json',
+    { parseAs: 'string' },
+    async (request: FastifyRequest, payload: string) => {
+      const body = payload.toString();
+      if (body.trim() === '') {
+        return {};
+      }
+      return JSON.parse(body);
+    }
+  );
+
   // POST /api/quiz/start - Start a new quiz session
   fastify.post<{
-    Reply: { sessionId: string; question: any } | ApiError;
+    Reply: QuizStartResponse | ApiError;
   }>('/start', async (request: FastifyRequest, reply: FastifyReply) => {
     try {
       const sessionId = quizService.startSession();
       const question = quizService.getCurrentQuestion(sessionId);
+
+      if (!question) {
+        return ErrorHandlerService.handleInternalError(
+          reply,
+          'Failed to retrieve first question',
+          fastify.log
+        );
+      }
 
       return {
         sessionId,
         question
       };
     } catch (error) {
-      fastify.log.error('Failed to start quiz session');
-      reply.code(500);
-      return {
-        error: 'Quiz Service Error',
-        message: 'Failed to start quiz session',
-        statusCode: 500
-      };
+      return ErrorHandlerService.handleQuizServiceError(
+        reply,
+        'Failed to start quiz session',
+        fastify.log
+      );
     }
   });
 
   // POST /api/quiz/answer - Submit an answer and get next question
   fastify.post<{
-    Body: QuizAnswer;
-    Reply: any | ApiError;
+    Body: QuizAnswerRequest;
+    Reply: QuizAnswerResponse | ApiError;
   }>('/answer', async (request: FastifyRequest, reply: FastifyReply) => {
     try {
-      const { sessionId, answer } = request.body as QuizAnswer;
+      const { sessionId, answer } = request.body as QuizAnswerRequest;
 
+      // Validate required fields
       if (!sessionId || answer === undefined) {
-        reply.code(400);
-        return {
-          error: 'Validation Error',
-          message: 'sessionId and answer are required',
-          statusCode: 400
-        };
+        return ErrorHandlerService.handleValidationError(
+          reply,
+          'sessionId and answer are required'
+        );
       }
 
+      // Submit answer to quiz service
       const result = quizService.submitAnswer(sessionId, answer);
 
       if (!result.success) {
-        reply.code(400);
-        return {
-          error: 'Validation Error',
-          message: result.error,
-          statusCode: 400
-        };
+        return ErrorHandlerService.handleValidationError(
+          reply,
+          result.error || 'Failed to submit answer'
+        );
       }
 
-      if (result.completed) {
-        return {
-          completed: true,
-          message: 'Quiz completed! Ready for calculation.'
-        };
-      }
-
+      // Return completion status with optional next question
       return {
-        completed: false,
-        question: result.nextQuestion
+        completed: result.completed || false,
+        question: result.nextQuestion,
+        message: result.completed
+          ? 'Quiz completed! Ready for calculation.'
+          : undefined
       };
     } catch (error) {
-      fastify.log.error('Failed to submit quiz answer');
-      reply.code(500);
-      return {
-        error: 'Quiz Service Error',
-        message: 'Failed to submit answer',
-        statusCode: 500
-      };
+      return ErrorHandlerService.handleQuizServiceError(
+        reply,
+        'Failed to submit answer',
+        fastify.log
+      );
     }
   });
 
   // POST /api/quiz/calculate - Calculate results and get AI recommendations
   fastify.post<{
     Body: QuizCalculationRequest;
-    Reply: any | ApiError;
+    Reply: QuizCalculationResponse | ApiError;
   }>('/calculate', async (request: FastifyRequest, reply: FastifyReply) => {
     try {
       const { sessionId } = request.body as QuizCalculationRequest;
 
+      // Validate required fields
       if (!sessionId) {
-        reply.code(400);
-        return {
-          error: 'Validation Error',
-          message: 'sessionId is required',
-          statusCode: 400
-        };
+        return ErrorHandlerService.handleValidationError(
+          reply,
+          'sessionId is required'
+        );
       }
 
+      // Check if quiz is completed
       if (!quizService.isSessionCompleted(sessionId)) {
-        reply.code(400);
-        return {
-          error: 'Validation Error',
-          message: 'Quiz not completed yet',
-          statusCode: 400
-        };
+        return ErrorHandlerService.handleValidationError(
+          reply,
+          'Quiz not completed yet'
+        );
       }
 
+      // Get quiz answers
       const answers = quizService.getSessionAnswers(sessionId);
       if (!answers) {
-        reply.code(404);
-        return {
-          error: 'Not Found',
-          message: 'Session not found',
-          statusCode: 404
-        };
+        return ErrorHandlerService.handleNotFoundError(
+          reply,
+          'Session not found'
+        );
       }
 
       // Convert quiz answers to activities
-      const activities = convertAnswersToActivities(answers);
+      const activities =
+        QuizAnswerConverterService.convertToActivities(answers);
 
       // Calculate carbon footprint
       const calculation = await calculationService.calculate({ activities });
@@ -143,20 +159,18 @@ const quizController: FastifyPluginAsync = async (fastify) => {
         answers
       };
     } catch (error) {
-      fastify.log.error('Failed to calculate quiz results');
-      reply.code(500);
-      return {
-        error: 'Quiz Service Error',
-        message: 'Failed to calculate results',
-        statusCode: 500
-      };
+      return ErrorHandlerService.handleQuizServiceError(
+        reply,
+        'Failed to calculate results',
+        fastify.log
+      );
     }
   });
 
   // GET /api/quiz/status/:sessionId - Get quiz status
   fastify.get<{
     Params: { sessionId: string };
-    Reply: any | ApiError;
+    Reply: QuizStatusResponse | ApiError;
   }>(
     '/status/:sessionId',
     async (request: FastifyRequest, reply: FastifyReply) => {
@@ -166,78 +180,28 @@ const quizController: FastifyPluginAsync = async (fastify) => {
         const currentQuestion = quizService.getCurrentQuestion(sessionId);
         const completed = quizService.isSessionCompleted(sessionId);
 
+        // Check if session exists
         if (!currentQuestion && !completed) {
-          reply.code(404);
-          return {
-            error: 'Not Found',
-            message: 'Session not found',
-            statusCode: 404
-          };
+          return ErrorHandlerService.handleNotFoundError(
+            reply,
+            'Session not found'
+          );
         }
 
         return {
           sessionId,
           completed,
-          currentQuestion: completed ? null : currentQuestion
+          currentQuestion: completed ? undefined : currentQuestion
         };
       } catch (error) {
-        fastify.log.error('Failed to get quiz status');
-        reply.code(500);
-        return {
-          error: 'Quiz Service Error',
-          message: 'Failed to get quiz status',
-          statusCode: 500
-        };
+        return ErrorHandlerService.handleQuizServiceError(
+          reply,
+          'Failed to get quiz status',
+          fastify.log
+        );
       }
     }
   );
-
-  // Helper function to convert quiz answers to calculation activities
-  function convertAnswersToActivities(answers: Record<string, any>) {
-    const activities = [];
-
-    // Convert diet type to food activity
-    if (answers.diet_type) {
-      const dietMap: Record<string, string> = {
-        'High meat consumption (meat multiple times per day)': 'highMeat',
-        'Moderate meat consumption (meat once per day)': 'moderateMeat',
-        'Low meat consumption (meat few times per week)': 'lowMeat',
-        'Vegetarian (no meat, but dairy and eggs)': 'vegetarian',
-        'Vegan (no animal products)': 'vegetarian' // For now, treat vegan same as vegetarian
-      };
-
-      const dietType = dietMap[answers.diet_type];
-      if (dietType) {
-        activities.push({
-          category: 'food' as const,
-          type: dietType,
-          amount: 365 // Annual calculation
-        });
-      }
-    }
-
-    // Convert energy source and consumption to energy activity
-    if (answers.energy_source && answers.monthly_kwh) {
-      const energyMap: Record<string, string> = {
-        'Renewable energy (solar, wind, hydro)': 'renewable',
-        'Natural gas': 'naturalGas',
-        'Coal-based electricity': 'coal',
-        'Nuclear power': 'nuclear',
-        'Mixed grid electricity (standard utility)': 'mixed'
-      };
-
-      const energyType = energyMap[answers.energy_source];
-      if (energyType) {
-        activities.push({
-          category: 'energy' as const,
-          type: energyType,
-          amount: Number(answers.monthly_kwh) * 12 // Convert to annual kWh
-        });
-      }
-    }
-
-    return activities;
-  }
 };
 
 export default quizController;

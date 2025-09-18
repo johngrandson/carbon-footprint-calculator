@@ -30,7 +30,7 @@ describe('QuizService - Session Management', () => {
   it('should return null for non-existent session', () => {
     const currentQuestion = quizService.getCurrentQuestion('invalid_session');
 
-    expect(currentQuestion).toBeNull();
+    expect(currentQuestion).toBeUndefined();
   });
 
   it('should handle multiple concurrent sessions', () => {

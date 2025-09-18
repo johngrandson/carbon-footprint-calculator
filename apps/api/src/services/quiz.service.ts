@@ -63,20 +63,20 @@ export class QuizService {
       currentQuestionIndex: 0,
       answers: {},
       completed: false,
-      createdAt: new Date()
+      createdAt: new Date().toISOString()
     };
 
     this.sessions.set(sessionId, session);
     return sessionId;
   }
 
-  getCurrentQuestion(sessionId: string): QuizQuestion | null {
+  getCurrentQuestion(sessionId: string): QuizQuestion | undefined {
     const session = this.sessions.get(sessionId);
     if (!session || session.completed) {
-      return null;
+      return undefined;
     }
 
-    return this.questions[session.currentQuestionIndex] || null;
+    return this.questions[session.currentQuestionIndex];
   }
 
   submitAnswer(sessionId: string, answer: any): QuizSubmissionResult {
