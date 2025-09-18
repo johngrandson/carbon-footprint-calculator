@@ -1,4 +1,3 @@
-import * as React from 'react';
 import { type Metadata } from 'next';
 import Image, { type ImageProps } from 'next/image';
 import Link from 'next/link';
@@ -6,36 +5,37 @@ import Link from 'next/link';
 import { Button } from '@workspace/ui/components/button';
 import { Homepage } from '@workspace/ui/components/homepage';
 
-export const metadata: Metadata = {
+const SITE_CONFIG = {
   title: 'Sinai Carbon Footprint Calculator',
-  description:
-    'Calculate your personal carbon footprint and discover actionable ways to reduce your environmental impact.',
+  description: 'Calculate your personal carbon footprint and discover actionable ways to reduce your environmental impact.',
   keywords: [
     'carbon footprint',
     'environmental impact',
     'sustainability',
     'climate change',
     'calculator'
-  ]
+  ],
+  logo: {
+    src: '/sinai-logo.png',
+    alt: 'Sinai logo',
+    width: 120,
+    height: 25,
+  }
+} as const;
+
+export const metadata: Metadata = {
+  title: SITE_CONFIG.title,
+  description: SITE_CONFIG.description,
+  keywords: [...SITE_CONFIG.keywords]
 };
 
-type Props = Omit<ImageProps, 'src'> & {
+type LogoImageProps = Omit<ImageProps, 'src'> & {
   src: string;
 };
 
-const ThemeImage = (props: Props) => {
-  const { src, ...rest } = props;
-
-  return (
-    <>
-      <Image
-        {...rest}
-        src={src}
-        className="img"
-      />
-    </>
-  );
-};
+const LogoImage = ({ src, ...rest }: LogoImageProps) => (
+  <Image {...rest} src={src} className="img" />
+);
 
 export default function HomePage(): React.JSX.Element {
   return (
@@ -49,11 +49,11 @@ export default function HomePage(): React.JSX.Element {
       {/* Header with Logo */}
       <header className="relative z-20 mt-10 flex-shrink-0">
         <div className="flex justify-center">
-          <ThemeImage
-            src="/sinai-logo.png"
-            alt="Sinai logo"
-            width={120}
-            height={25}
+          <LogoImage
+            src={SITE_CONFIG.logo.src}
+            alt={SITE_CONFIG.logo.alt}
+            width={SITE_CONFIG.logo.width}
+            height={SITE_CONFIG.logo.height}
             priority
           />
         </div>

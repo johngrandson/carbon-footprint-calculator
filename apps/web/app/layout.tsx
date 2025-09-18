@@ -5,21 +5,31 @@ import { Inter } from 'next/font/google';
 
 import { Providers } from './providers';
 
+const THEME_COLORS = {
+  light: 'white',
+  dark: 'black',
+} as const;
+
+const SCALE_VALUES = {
+  initial: 1,
+  minimum: 1,
+  maximum: 1,
+} as const;
+
 export const viewport: Viewport = {
   width: 'device-width',
-  initialScale: 1,
-  minimumScale: 1,
-  maximumScale: 1,
+  initialScale: SCALE_VALUES.initial,
+  minimumScale: SCALE_VALUES.minimum,
+  maximumScale: SCALE_VALUES.maximum,
   themeColor: [
-    { media: '(prefers-color-scheme: light)', color: 'white' },
-    { media: '(prefers-color-scheme: dark)', color: 'black' }
+    { media: '(prefers-color-scheme: light)', color: THEME_COLORS.light },
+    { media: '(prefers-color-scheme: dark)', color: THEME_COLORS.dark }
   ]
 };
 
 export const metadata: Metadata = {
   title: 'SINAI | Carbon Footprint Calculator',
-  description:
-    'Calculate your carbon footprint and make the difference in the world!',
+  description: 'Calculate your carbon footprint and make the difference in the world!',
   robots: {
     index: true,
     follow: true

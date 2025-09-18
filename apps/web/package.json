@@ -8,10 +8,15 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint --max-warnings 0",
-    "check-types": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "vitest",
+    "test:run": "vitest run",
+    "test:ui": "vitest --ui"
   },
   "dependencies": {
+    "@workspace/contracts": "workspace:*",
     "@workspace/ui": "workspace:*",
+    "class-variance-authority": "^0.7.1",
     "next": "^15.5.0",
     "next-secure-headers": "^2.2.0",
     "react": "^19.1.0",
@@ -19,13 +24,18 @@
   },
   "devDependencies": {
     "@next/bundle-analyzer": "15.3.3",
+    "@testing-library/jest-dom": "^6.8.0",
+    "@testing-library/react": "^16.3.0",
+    "@testing-library/user-event": "^14.6.1",
     "@types/node": "^22.15.3",
-    "@types/react": "19.1.0",
-    "@types/react-dom": "19.1.1",
+    "@types/react": "19.1.13",
+    "@types/react-dom": "19.1.9",
     "@workspace/eslint-config": "workspace:*",
     "@workspace/typescript-config": "workspace:*",
+    "@workspace/vitest-config": "workspace:^",
     "eslint": "^9.34.0",
-    "typescript": "5.9.2"
+    "typescript": "5.9.2",
+    "vitest": "^3.2.4"
   },
   "prettier": "@workspace/prettier-config"
 }

@@ -8,6 +8,14 @@ const nextConfig: NextConfig = {
   /** Enables hot reloading for local packages without a build step */
   transpilePackages: INTERNAL_PACKAGES,
   serverExternalPackages: [],
+  /** Force single Three.js instance to prevent duplicate imports */
+  webpack: (config) => {
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      'three': require.resolve('three'),
+    };
+    return config;
+  },
   experimental: {
     optimizePackageImports: [
       "recharts",
@@ -39,6 +47,14 @@ const nextConfig: NextConfig = {
   },
   async redirects() {
     return [];
+  },
+  async rewrites() {
+    return [
+      {
+        source: '/api/:path*',
+        destination: 'http://localhost:4000/api/:path*',
+      },
+    ];
   },
 };
 

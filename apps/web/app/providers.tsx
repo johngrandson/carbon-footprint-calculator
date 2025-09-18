@@ -1,19 +1,19 @@
 'use client';
 
-import * as React from 'react';
+import type { PropsWithChildren } from 'react';
 
 import { ThemeProvider } from '@workspace/ui/hooks/use-theme';
 
-export function Providers({
-  children
-}: React.PropsWithChildren): React.JSX.Element {
+const THEME_CONFIG = {
+  attribute: 'class',
+  defaultTheme: 'dark',
+  enableSystem: true,
+  disableTransitionOnChange: true,
+} as const;
+
+export function Providers({ children }: PropsWithChildren) {
   return (
-    <ThemeProvider
-      attribute="class"
-      defaultTheme="dark"
-      enableSystem
-      disableTransitionOnChange
-    >
+    <ThemeProvider {...THEME_CONFIG}>
       {children}
     </ThemeProvider>
   );

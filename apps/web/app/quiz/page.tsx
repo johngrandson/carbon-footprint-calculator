@@ -1,38 +1,72 @@
-import * as React from 'react';
-import { type Metadata } from 'next';
+'use client';
+
+import { useState, useCallback } from 'react';
 
 import { FloatingFruits } from '@workspace/ui/components/floating-fruits';
+import { EnergyBackground } from '@workspace/ui/components/energy-background';
 
-import { QuizWizard } from '~/components/quiz/quiz-wizard';
+import { QuizForm } from '~/components/quiz/quiz-form';
 
-export const metadata: Metadata = {
-  title: 'SINAI | Carbon Footprint Calculator',
-  description:
-    'Calculate your personal carbon footprint and discover ways to reduce your environmental impact.',
-  keywords: [
-    'carbon footprint',
-    'environmental impact',
-    'sustainability',
-    'calculator'
-  ]
+const BACKGROUND_CONFIG = {
+  food: {
+    speed: 0.5,
+    count: 70,
+    depth: 100,
+    backgroundColor: '#ffbf40',
+    environment: 'sunset' as const,
+  },
+  energy: {},
+  default: {
+    speed: 0.5,
+    count: 70,
+    depth: 100,
+    backgroundColor: '#ffbf40',
+    environment: 'sunset' as const,
+  }
+} as const;
+
+const BACKGROUND_STYLES = 'absolute inset-0 z-0';
+
+type QuizCategory = 'food' | 'energy' | null;
+
+const BackgroundRenderer = ({ category }: { category: QuizCategory }) => {
+  switch (category) {
+    case 'food':
+      return (
+        <FloatingFruits
+          className={BACKGROUND_STYLES}
+          {...BACKGROUND_CONFIG.food}
+        />
+      );
+    case 'energy':
+      return (
+        <EnergyBackground className={BACKGROUND_STYLES} />
+      );
+    default:
+      return (
+        <FloatingFruits
+          className={BACKGROUND_STYLES}
+          {...BACKGROUND_CONFIG.default}
+        />
+      );
+  }
 };
 
-export default function QuizPage(): React.JSX.Element {
+export default function QuizPage() {
+  const [currentCategory, setCurrentCategory] = useState<QuizCategory>(null);
+
+  const handleCategoryChange = useCallback((category: string | null) => {
+    setCurrentCategory(category as QuizCategory);
+  }, []);
+
   return (
     <div className="relative h-screen overflow-hidden">
-      {/* Floating Fruits Background */}
-      <FloatingFruits
-        className="absolute inset-0 z-0"
-        speed={0.5}
-        count={70}
-        depth={100}
-        backgroundColor="#ffbf40"
-        environment="sunset"
-      />
+      {/* Dynamic Background based on category */}
+      <BackgroundRenderer category={currentCategory} />
 
       {/* Quiz Content */}
       <div className="relative z-10">
-        <QuizWizard />
+        <QuizForm onCategoryChange={handleCategoryChange} />
       </div>
     </div>
   );
